@@ -21,7 +21,8 @@
 #define STR_HELPER(v) #v
 #define STR(v) STR_HELPER(v)
 
-#define ARR_LEN 2000 // The length of the array, increase to have more execution time
+#define ARR_LEN 10000 // The length of the array, increase to have more execution time
+#define THRESHOLD 1000 // If the size of the partition of the array is smaller than this, it will sort sequentially (for b)
 #define MAX_PRINT 30
 #define FIRST_VALUES " (FIRST " STR(MAX_PRINT)")"
 #define MIN_VAL -ARR_LEN*10 // Minimum value of the array elements
@@ -119,9 +120,44 @@ int main(int argc, char* argv[]) {
 /**
  * Version where each recursive call is performed by a new thread
  **/
-void a_quick_sort_par(int array[], int low, int high) {
 
-	quick_sort_seq(array,low,high); //replace with your code!
+typedef struct {
+    int *array;
+    int low;
+    int high;
+} thread_args;
+
+static void *thread_func(void *arg) {
+    thread_args *a = (thread_args *)arg;
+    if (a != NULL) {
+        a_quick_sort_par(a->array, a->low, a->high);
+        free(a);
+    }
+    return NULL;
+}
+
+/* Version where each recursive call is performed by a new thread */
+void a_quick_sort_par(int array[], int low, int high) {
+    if (low < high) {
+        int m = split(array, low, high);
+
+        pthread_t t_left, t_right;
+
+        thread_args *left_args = (thread_args *)malloc(sizeof(thread_args)); //Through malloc due to recursive calls
+        left_args->array = array;
+        left_args->low = low;
+        left_args->high = m - 1;
+		pthread_create(&t_left, NULL, thread_func, left_args);
+  
+        thread_args *right_args = (thread_args *)malloc(sizeof(thread_args));
+        right_args->array = array;
+        right_args->low = m + 1;
+        right_args->high = high;
+        pthread_create(&t_right, NULL, thread_func, right_args);
+
+ 		pthread_join(t_left, NULL);
+		pthread_join(t_right, NULL);
+    }
 }
 
 /**
@@ -129,8 +165,31 @@ void a_quick_sort_par(int array[], int low, int high) {
  * if the size of the sublist is smaller than a predefined threshold
  **/
 void b_quick_sort_par(int array[], int low, int high) {
+	int size = high - low + 1;
+	if(size < THRESHOLD){					//Main difference: if the size of the received array is smaller than "THRESHOLD", it will not create more threads (sequential execution)
+		quick_sort_seq(array,low,high);
+	}
 
-	quick_sort_seq(array,low,high); //replace with your code!
+	if (low < high) {
+        int m = split(array, low, high);
+
+        pthread_t t_left, t_right;
+
+        thread_args *left_args = (thread_args *)malloc(sizeof(thread_args));
+        left_args->array = array;
+        left_args->low = low;
+        left_args->high = m - 1;
+		pthread_create(&t_left, NULL, thread_func, left_args);
+  
+        thread_args *right_args = (thread_args *)malloc(sizeof(thread_args));
+        right_args->array = array;
+        right_args->low = m + 1;
+        right_args->high = high;
+        pthread_create(&t_right, NULL, thread_func, right_args);
+
+ 		pthread_join(t_left, NULL);
+		pthread_join(t_right, NULL);
+    }
 }
 
 /************ Seq. Quicksort algorithm *****************/

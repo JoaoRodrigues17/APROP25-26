@@ -110,23 +110,108 @@ int main(int argc, char *argv[])
 /**
  * Version where each thread is responsible for a single position of the result matrix
  **/
-void a_par_by_pos(){
-    
-    seq(); //replace this with your code!
+
+typedef struct thread_data_a {
+    int l;
+    int n;
+} thread_data_a;
+
+thread_data_a data[L*N];
+
+void *thread_calc_a(void *arg){
+    long i = (long)arg;
+    int l = data[i].l;
+    int n = data[i].n;
+    calc(l,n);
+    return NULL;
 }
+
+void a_par_by_pos(){
+    pthread_t thread_id[L][N];
+    long i = 0;
+
+    for(int l = 0; l < L; l++)
+    {
+        for (int n = 0; n < N; n++)
+        {
+            data[i].l = l;
+            data[i].n = n;
+            pthread_create(&thread_id[l][n], NULL, thread_calc_a, (void *)i);
+            i++;
+        }
+    }
+
+    for(int l = 0; l < L; l++){
+        for(int n = 0; n < N; n++){
+            pthread_join(thread_id[l][n], NULL);
+        }
+    }
+}
+
+
 
 /**
  * Version where each thread is responsible for one line of the result matrix
  **/
+
+void *thread_calc_b(void *arg){
+    int l = *((int *)arg);
+    for (int n = 0; n < N; n++)
+    {
+        calc(l,n);
+    }
+    return NULL;
+}
+
 void b_par_by_row(){
-    seq(); //replace this with your code!
+    pthread_t thread_id[L];
+    int line_ids[L];
+    for(int l = 0; l < L; l++)
+    {
+        line_ids[l] = l;
+        pthread_create(&thread_id[l], NULL, thread_calc_b, (void *)&line_ids[l]);
+    }
+    for(int l = 0; l < L; l++){
+        pthread_join(thread_id[l], NULL);
+    }
 }
 /**
  * Version where each thread is responsible for a number of user input lines 
  * of the result matrix
  **/
+
+ typedef struct thread_data_c {
+    int start;
+    int end;
+} thread_data_c;
+
+void *thread_calc_c(void *arg){
+    thread_data_c* data = (thread_data_c *)arg;
+    int start = data->start;
+    int end = data->end;
+    for(int l = start; l < end; l++){
+        for(int n = 0; n < N; n++){
+            calc(l,n);
+        }
+    }
+    return NULL;
+}
+    
 void c_par_by_user_rows(int num_lines_per_thread){
-    seq(); //replace this with your code!
+    int nr_threads = L % num_lines_per_thread  == 0 ? L / num_lines_per_thread : L / num_lines_per_thread + 1;
+    pthread_t thread_id[nr_threads];
+    thread_data_c thread_data[nr_threads];
+
+    for(int i = 0; i < nr_threads; i++)
+    {
+        thread_data[i].start = i * num_lines_per_thread;
+
+        thread_data[i].end = (i + 1) * num_lines_per_thread > L ? L : (i + 1) * num_lines_per_thread;
+        pthread_create(&thread_id[i], NULL, thread_calc_c, (void *)&thread_data[i]);
+    }
+    for(int i = 0; i < nr_threads; i++){
+        pthread_join(thread_id[i], NULL);
+    }
 }
 
 
