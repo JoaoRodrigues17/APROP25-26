@@ -1,6 +1,6 @@
 BIN= init mmult mandel_seq mandel_par mandel
 
-NUM_THREADS = 8
+NUM_THREADS = 10
 all: $(BIN)
 
 init:
