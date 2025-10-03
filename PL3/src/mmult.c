@@ -98,20 +98,17 @@ int main(int argc, char *argv[])
  * Version where each thread is responsible for a set of rows
  **/
 void par_row(int num_threads){
-    #pragma omp parallel num_threads(num_threads)
-    {
-        int my_index = omp_get_thread_num();
-        for (int l = my_index *L/num_threads; l < (my_index+1)*L/num_threads; l++)
+    #pragma omp parallel for collapse(2) schedule(auto) num_threads(num_threads)
+    for (int l = 0; l < L; l++)
+    {   
+        for (int n = 0; n < N; n++)
         {
-            for (int n = 0; n < N; n++)
+            int sum = 0;
+            for (int m = 0; m < M; m++)
             {
-                int sum = 0;
-                for (int m = 0; m < M; m++)
-                {
-                    sum += A[l][m] * B[m][n];
-                }
-                C[l][n] = sum;
+                sum += A[l][m] * B[m][n];
             }
+            C[l][n] = sum;
         }
     }
 }
