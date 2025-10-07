@@ -97,10 +97,11 @@ int main(int argc, char* argv[]) {
 	//print_array(array,ARR_LEN,"Version X");
 	//note that it will only print the first 'MAX_PRINT' elements if the array is too large
 	printf("Parallel Sorting...");
-	begin = clock();
+	double start = omp_get_wtime();
 	quick_sort_par(array, 0, ARR_LEN - 1, num_threads);
-    end = clock();
-    double par_a_time =  (double)(end - begin) / CLOCKS_PER_SEC;
+    double finish = omp_get_wtime();
+    double par_a_time = finish - start;
+    
 	printf(" done!\n");
 	//then invoke the following code to validate your version
 	assert(expected,array,ARR_LEN);
