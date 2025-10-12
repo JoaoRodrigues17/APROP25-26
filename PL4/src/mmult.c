@@ -78,17 +78,9 @@ int main(int argc, char *argv[])
 
     c_clean();
     
-    /*printf("Thread working on region (block)... "); //not done for this exercise
-    double start = omp_get_wtime();
-    par_block(num_threads);
-    double end = omp_get_wtime();
-    double per_block_time = end - start;
-    printf("done.\n");
-    assert(C,expected);*/
     printf("\n- ==== Performance ==== -\n");
     printf("Sequential time:     %fs\n",sequential_time);
-    printf("Parallel lines time: %fs\n",per_row_time);
-    //printf("Parallel block time: %fs\n",per_block_time);  
+    printf("Parallel lines time: %fs\n",per_row_time);  
 }
 
 /***
@@ -121,32 +113,6 @@ void par_row(int num_threads){
     }
     }
 }
-
-
-/**
- * Version where each thread is responsible for a block of cells
- **/
-/*void par_block(int num_threads){
-    #pragma omp parallel num_threads(num_threads)
-    {
-        int block_size = L / num_threads;
-
-        int my_index = omp_get_thread_num();
-        for (int l = my_index *L/num_threads; l < (my_index+1)*L/num_threads; l++)
-        {
-            for (int n = 0; n < N; n++)
-            {
-                int sum = 0;
-                for (int m = 0; m < M; m++)
-                {
-                    sum += A[l][m] * B[m][n];
-                }
-                C[l][n] = sum;
-            }
-        }
-    }
-}*/
-
 
 
 /**

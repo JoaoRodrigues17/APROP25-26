@@ -24,3 +24,9 @@ quicksort: src/quick_sort.c
 quicksort_run: quicksort
 	bin/quicksort $(NUM_THREADS)
 
+arraysum: src/array_sum.c
+	gcc -Wall src/array_sum.c -o bin/arraysum -fopenmp
+
+arraysum_run: arraysum
+	bin/arraysum
+

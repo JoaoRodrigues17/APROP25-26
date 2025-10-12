@@ -126,17 +126,21 @@ void quick_sort_par(int array[], int low, int high, int num_threads) {
 		
 		/* Specify the middle of the array by calling the split function */
 		m = split(array, low, high);
-		#pragma omp parallel sections num_threads(2)
+		#pragma omp parallel 
 		{
 		/* Call the quick_sort function to sort the antecedent array */
-		#pragma omp section
+		#pragma omp single nowait
+		{
+		#pragma omp task
 		{
 		quick_sort_par(array, low, m - 1,num_threads);
 		}
+		
 		/* Call the quick_sort function to sort the subsequent array */
-		#pragma omp section
+		#pragma omp task
 		{
 		quick_sort_par(array, m + 1, high,num_threads);
+		}
 		}
 		}
 	}
