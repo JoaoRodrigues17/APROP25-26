@@ -30,3 +30,14 @@ arraysum: src/array_sum.c
 arraysum_run: arraysum
 	bin/arraysum
 
+bm: src/blocked_matrix.c
+	gcc -Wall src/blocked_matrix.c -o bin/bm -fopenmp
+
+bm_run: bm
+	bin/bm
+
+bm2: src/blocked_matrix.c
+	clang -Wall src/blocked_matrix.c -o bin/bm2 -fopenmp
+
+bm2_run: bm2
+	bin/bm2
