@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     double end = omp_get_wtime();
     double per_row_time = end - start;
     printf("done.\n");
-    //assert(M,expected);
+    assert(M,expected);
 
     copy_matrix(R,M);
     
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     double end1 = omp_get_wtime();
     double per_block_time = end1 - start1;
     printf("done.\n");
-    //assert(M,expected);
+    assert(M,expected);
     printf("\n- ==== Performance ==== -\n");
     printf("Sequential time:     %fs\n",sequential_time);
     printf("Parallel cells time: %fs\n",per_row_time);
