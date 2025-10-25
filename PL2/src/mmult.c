@@ -110,7 +110,7 @@ void par_row(int num_threads){
     #pragma omp parallel
     {
         int my_index = omp_get_thread_num();
-        int n_threads = omp_get_num_threads ( );
+        int n_threads = omp_get_num_threads ();
         for (int l = my_index * N / n_threads; l < (my_index+1)*N/n_threads; l++)
         {
             for (int n = 0; n < N; n++)

@@ -110,23 +110,116 @@ int main(int argc, char *argv[])
 /**
  * Version where each thread is responsible for a single position of the result matrix
  **/
+
+typedef struct{
+    int row;
+    int col;
+}position;
+
+void* calculate_element(void *arg){
+    position* cpos = (position*) arg;
+    int l = cpos->row;
+    int n = cpos->col;
+    int sum = 0;
+
+    for (int i = 0; i < M; m++) {
+        sum += A[l][m] * B[m][n];
+    }
+    C[l][n] = sum;
+    free(arg);
+    pthread_exit(NULL);
+}
+
 void a_par_by_pos(){
-    
-    seq(); //replace this with your code!
+    pthread_t threads[N*K];
+    int t = 0;
+    for(int l = 0; l < L; l++)
+    {
+        for (int n = 0; n < N; n++)
+        {
+            postition *pos = malloc(sizeof(position));
+            pos->row = L;
+            pos->col = N;
+            pthread_create(&threads[t++], NULL, calculate_element, pos);
+        }
+    }
+
+    for (int i = 0; i < L*N; i++) {
+        pthread_join(threads[i], NULL);
+    }
 }
 
 /**
  * Version where each thread is responsible for one line of the result matrix
  **/
+
+void *multiply_row(void* arg){
+    int l = *(int*) arg;
+    for (int n = 0; n < L; n++){
+        calc(l, n);
+    }
+    pthread_exit(NULL);
+}
+
+
 void b_par_by_row(){
-    seq(); //replace this with your code!
+    pthread_t thread_id[L];
+    int rows[L];
+
+    for(int l = 0; l < L; l++)
+    {
+        rows[l] = l;
+        pthread_create(&thread_id[l], NULL, multiply_row, (void *)&rows[l]);
+        i++;
+        
+    }
+
+    for(int l = 0; l < L; l++){
+        pthread_join(thread_id[l], NULL);
+    }
 }
 /**
  * Version where each thread is responsible for a number of user input lines 
  * of the result matrix
  **/
+typedef struct {
+    int s_row;
+    int e_row;
+}m_range;
+
+void *multiply_rows_selected(void* arg){
+    m_range r = (mrange*) arg;
+    for (int n = r->s_row; n < e_row; n++){
+        for int n = 0; n < L; n++){
+            calc(l, n);
+        }
+    }
+    free(arg);
+    pthread_exit(NULL);
+}
+
+
 void c_par_by_user_rows(int num_lines_per_thread){
-    seq(); //replace this with your code!
+    int nrows;
+    int nthreads = (L + nrows - 1)/nrows;
+    pthread_t thread_id[nthreads];
+    int rows[L];
+
+    for(int l = 0; l < nthreads; l++)
+    {
+        m_range r = malloc(sizeof(m_range));
+        r->s_row = l*nrows;
+        r->e_row = (i+1)*nrows;
+        if(r->e_row > L) r->e_row = L;
+        pthread_create(&thread_id[l], NULL, multiply_rows_selected, r);
+        i++;
+        
+    }
+
+    for(int l = 0; l < nthreads; l++){
+        pthread_join(thread_id[l], NULL);
+    }
+
 }
 
 
@@ -140,6 +233,7 @@ void seq()
     {
         for (int n = 0; n < N; n++)
         {
+            // pthread_create
             int sum = 0;
             for (int m = 0; m < M; m++)
             {
