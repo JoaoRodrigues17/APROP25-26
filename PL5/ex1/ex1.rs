@@ -1,6 +1,6 @@
-//In this exercise, we'll be practicing some core concepts of rust.
-//The focus is in learning the language, not having the best code for a real world scenario
-//Therefore, some best practices (checking if array is empty, p.e.) are not followed for simplicity purposes
+//In these exercises, we'll be practicing some core concepts of rust.
+//The focus is in learning the language, not having the best performing code for a real world scenario
+//Therefore, some best practices (checking if array is empty, repeating declarations, p.e.) are not followed for simplicity purposes
 
 
 // functions for a)
