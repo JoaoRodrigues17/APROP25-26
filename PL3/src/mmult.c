@@ -21,9 +21,9 @@
 #include <omp.h>
 
 // Matrices dimensions, where A is LxM, B is MxN, and C is LxN
-#define L 512
-#define M 512
-#define N 512
+#define L 1000
+#define M 1000
+#define N 1000
 
 #define DEFAULT_NUM_THREADS 4
 
