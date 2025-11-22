@@ -58,6 +58,7 @@ int numoutside = 0;
 void testpoint(struct d_complex);
 result_t seq_mandel();
 result_t par_mandel(int num_threads);
+result_t par_task_mandel(int num_threads);
 
 int main(int argc, char *argv[])
 {
@@ -90,20 +91,36 @@ int main(int argc, char *argv[])
     double par_time = finish - start;
     printf("done.\n");
     int par_num_outside = numoutside;
-    printf("[PAR]Area of Mandlebrot set = %12.8f +/- %12.8f (outside: %d)\n",par_res.area,par_res.error,par_num_outside);
+    numoutside = 0;
+
+    printf("\nParallel task Mandelbrot... ");
+    double start2 = omp_get_wtime();
+    result_t par_task_res = par_task_mandel(num_threads);
+    double finish2 = omp_get_wtime();
+    double par_task_time = finish2 - start2;
+    printf("done.\n");
+    int par_task_num_outside = numoutside;
+
+    printf("[PAR-TASK]Area of Mandlebrot set = %12.8f +/- %12.8f (outside: %d)\n",par_task_res.area,par_task_res.error,par_task_num_outside);
 
     printf("\n- ==== Performance ==== -\n");
     printf("Sequential time: %fs\n",seq_time);
     printf("Parallel   time: %fs\n",par_time);  
+    printf("Parallel task time: %fs\n",par_task_time);
 
     if (expected.area != par_res.area 
         || expected.error != par_res.error
-        || expected_num_outside != par_num_outside){
+        || expected_num_outside != par_num_outside
+        || expected.area != par_task_res.area
+        || expected.error != par_task_res.error
+        || expected_num_outside != par_task_num_outside){
         printf("\n!Assert failed!\n");
         printf("Sequential:\n");
         printf("\tArea of Mandlebrot set = %12.8f +/- %12.8f (outside: %d)\n",expected.area,expected.error,expected_num_outside);
         printf("Parallel:\n");
         printf("\tArea of Mandlebrot set = %12.8f +/- %12.8f (outside: %d)\n",par_res.area,par_res.error,par_num_outside);
+        printf("Parallel task:\n");
+        printf("\tArea of Mandlebrot set = %12.8f +/- %12.8f (outside: %d)\n",par_task_res.area,par_task_res.error,par_task_num_outside);
     }
 }
 
@@ -118,6 +135,35 @@ result_t par_mandel(int num_threads){
             c.i = 1.125*(double)(j)/(double)(NPOINTS)+eps;
             testpoint(c);
         }
+    }
+
+    // Calculate area of set and error estimate and output the results
+    area=2.0*2.5*1.125*(double)(NPOINTS*NPOINTS-numoutside)/(double)(NPOINTS*NPOINTS);
+    error=area/(double)NPOINTS;
+
+    result_t result = {area,error};
+    return result;
+}
+
+result_t par_task_mandel(int num_threads){
+    int i;
+    double area, error, eps  = 1.0e-5;
+    #pragma omp parallel
+    {
+    #pragma omp single
+    {
+        for (i=0; i<NPOINTS; i++) {
+            #pragma omp task private(c)
+            {
+            for (int j=0; j<NPOINTS; j++) {
+                
+                c.r = -2.0+2.5*(double)(i)/(double)(NPOINTS)+eps;
+                c.i = 1.125*(double)(j)/(double)(NPOINTS)+eps;
+                testpoint(c);
+                }
+            }
+        }
+    }
     }
 
     // Calculate area of set and error estimate and output the results

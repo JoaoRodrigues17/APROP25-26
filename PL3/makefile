@@ -24,8 +24,20 @@ quicksort: src/quick_sort.c
 quicksort_run: quicksort
 	bin/quicksort $(NUM_THREADS)
 
-bubblesort: src/bubble_sort.c
-	gcc -Wall src/bubble_sort.c -o bin/bubblesort -fopenmp 
+arraysum: src/array_sum.c
+	gcc -Wall src/array_sum.c -o bin/arraysum -fopenmp
 
-bubblesort_run: bubblesort
-	bin/bubblesort $(NUM_THREADS)
+arraysum_run: arraysum
+	bin/arraysum
+
+bm: src/blocked_matrix.c
+	gcc -Wall src/blocked_matrix.c -o bin/bm -fopenmp
+
+bm_run: bm
+	bin/bm
+
+bm2: src/blocked_matrix.c
+	clang -Wall src/blocked_matrix.c -o bin/bm2 -fopenmp
+
+bm2_run: bm2
+	bin/bm2
