@@ -24,12 +24,33 @@ fn mode(v1: &Vec<i32>) -> i32 {
     }
     
     let map = Arc::try_unwrap(map).unwrap().into_inner().unwrap();
-    
-    // Find the mode (not parallel)
-    match map.iter().max_by_key(|(_, count)| *count) {
-        Some((value, _)) => *value,
-        None => 0
+
+    // Parallel Find max frequency
+    let chunk_size = map.len() / NUM_THREADS;
+    let mut handles = Vec::new();
+    let entries: Vec<(i32, i32)> = map.iter().map(|(&k, &v)| (k, v)).collect();
+    for chunk in entries.chunks(chunk_size){
+        let chunk = chunk.to_owned();
+        let handle = thread::spawn( move || {
+            let mut local_max = (0,0); // (value, count)
+            for (key, value) in chunk {
+                if value > local_max.1 {
+                    local_max = (key, value);
+                }
+            }
+            local_max
+        });
+        handles.push(handle);
     }
+    let mut res = (i32::MIN, i32::MIN);
+    for handle in handles {
+        let local_max = handle.join().unwrap();
+        if local_max.1 > res.1 {
+            res = local_max;
+        }
+    }
+
+    res.0
 }
 
 
