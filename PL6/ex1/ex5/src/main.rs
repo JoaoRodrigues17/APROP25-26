@@ -33,10 +33,10 @@ fn main() {
         let handle = thread::spawn(move ||{
             let mut rng = StdRng::from_entropy();
             for j in 0..n {
-                let mut matrix_a = a.lock().unwrap(); 
-                matrix_a[(i, j)] = rng.gen_range(-10..10);
-                let mut matrix_b = b.lock().unwrap(); 
-                matrix_b[(i, j)] = rng.gen_range(-10..10);
+                let mut a = a.lock().unwrap(); 
+                a[(i, j)] = rng.gen_range(-10..10);
+                let mut b = b.lock().unwrap(); 
+                b[(i, j)] = rng.gen_range(-10..10);
             }
         });
         handles.push(handle);

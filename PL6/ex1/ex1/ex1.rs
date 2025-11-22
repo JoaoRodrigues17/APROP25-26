@@ -10,7 +10,7 @@ const NUM_THREADS:usize = 4;
 // functions for a)
 fn max(vec: &Vec<i32>) -> i32{
 
-    let chunk_size = vec.len() / NUM_THREADS;
+    let chunk_size = (vec.len()+NUM_THREADS-1) / NUM_THREADS;
     let mut handles = Vec::new();
 
     for chunk in vec.chunks(chunk_size) {
@@ -40,7 +40,7 @@ fn max(vec: &Vec<i32>) -> i32{
 }
 
 fn min(vec: &Vec<i32>) -> i32{
-    let chunk_size = vec.len() / NUM_THREADS;
+    let chunk_size = (vec.len()+NUM_THREADS-1) / NUM_THREADS;
     let mut handles = Vec::new();
 
     for chunk in vec.chunks(chunk_size) {
@@ -70,7 +70,7 @@ fn min(vec: &Vec<i32>) -> i32{
 }
 
 fn avg(vec: &Vec<i32>) -> f32{
-    let chunk_size = vec.len() / NUM_THREADS;
+    let chunk_size = (vec.len()+NUM_THREADS-1) / NUM_THREADS;
     let mut handles = Vec::new();
 
     for chunk in vec.chunks(chunk_size) {
@@ -115,7 +115,7 @@ fn vec_sum(v1: &Vec<i32>, v2: &Vec<i32>) -> Option<Vec<i32>>{
     let len = v1.len();
     let v3 = Arc::new(Mutex::new(vec![0; len]));
 
-    let chunk_size = len / NUM_THREADS;
+    let chunk_size = (len+NUM_THREADS-1) / NUM_THREADS;
 
     let mut handles = Vec::new();
 

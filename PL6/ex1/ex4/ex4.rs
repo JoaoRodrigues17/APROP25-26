@@ -8,7 +8,7 @@ fn mode(v1: &Vec<i32>) -> i32 {
     // Parallel frequency count
     let map = Arc::new(Mutex::new(HashMap::new()));
     let mut handles = Vec::new();
-    let chunk_size = v1.len() / NUM_THREADS;
+    let chunk_size = (v1.len()+NUM_THREADS-1) / NUM_THREADS;
     for chunk in v1.chunks(chunk_size){
         let chunk = chunk.to_owned();
         let map = Arc::clone(&map);
@@ -26,7 +26,7 @@ fn mode(v1: &Vec<i32>) -> i32 {
     let map = Arc::try_unwrap(map).unwrap().into_inner().unwrap();
 
     // Parallel Find max frequency
-    let chunk_size = map.len() / NUM_THREADS;
+    let chunk_size = (map.len()+NUM_THREADS-1) / NUM_THREADS;
     let mut handles = Vec::new();
     let entries: Vec<(i32, i32)> = map.iter().map(|(&k, &v)| (k, v)).collect();
     for chunk in entries.chunks(chunk_size){
