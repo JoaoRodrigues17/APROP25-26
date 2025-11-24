@@ -1,3 +1,7 @@
+use std::thread;
+use threadpool::ThreadPool;
+use std::sync::{Arc, Mutex};
+
 #[derive(Copy, Clone)]
 struct Complex {
     r: f64,
@@ -8,17 +12,28 @@ const MAXITER: u32 = 1000;
 const EPS: f64 = 1e-5;
 fn main() {
     println!("Mandelbrot!");
-     let num_outside: i32 = (0..NPOINTS)
-        .flat_map(|i| {
-            (0..NPOINTS).map(move |j| {
+    let n_workers = thread::available_parallelism().unwrap().get(); // Get nr of cores
+    let pool = ThreadPool::new(n_workers);  // Create thread pool
+    let num_outside =  Arc::new(Mutex::new(0)); //Shared counter updated by threads
+    for i in 0..NPOINTS {
+        let num_outside = num_outside.clone();  // Clone Arc to move into thread
+        pool.execute(move || {
+            let mut local = 0;
+            for j in 0..NPOINTS {
                 let c = Complex {
                     r: -2.0 + 2.5 * (i as f64) / (NPOINTS as f64) + EPS,
                     i: 1.125 * (j as f64) / (NPOINTS as f64) + EPS,
                 };
-                test_point(c)
-            })
-        })
-        .sum();
+                local += test_point(c);                
+            }
+            let mut num_outside = num_outside.lock().unwrap();  // Lock the mutex 
+                *num_outside += local;  // Update the counter (no unlock needed, it unlocks when goes out of scope)
+
+        });
+    }
+    pool.join();    // Wait for all threads to finish
+
+    let num_outside = *num_outside.lock().unwrap(); // Get final value of counter
 
     let size = NPOINTS * NPOINTS;
     let area = 2.0 * 2.5 * 1.125 * ((size as f64 - num_outside as f64) / size as f64);
